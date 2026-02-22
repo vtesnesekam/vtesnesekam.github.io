@@ -5,7 +5,7 @@
     ],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.example.iptv_twa",
+      "package_name": "com.example.makesense_application",
       "sha256_cert_fingerprints": [
         "5F:F7:94:32:20:BD:4D:A7:9A:E6:B7:CE:75:7F:F2:63:2B:69:FF:90:34:18:54:18:7C:80:13:92:4C:B5:01:32"
       ]
