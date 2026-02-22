@@ -2,7 +2,7 @@
   "name": "MakeSense IPTV",
   "short_name": "MakeSense",
   "start_url": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait",
