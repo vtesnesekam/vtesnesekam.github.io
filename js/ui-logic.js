@@ -9,7 +9,6 @@ const searchInput = document.getElementById('search-input');
 const tabsEl = document.getElementById('category-tabs');
 const clockEl = document.getElementById('clock');
 const muteBtn = document.getElementById('btn-mute-toggle');
-const muteLabel = document.getElementById('mute-label');
 const fsBtn = document.getElementById('btn-fullscreen');
 const osdEl = document.getElementById('osd');
 const osdNameEl = document.getElementById('osd-name');
@@ -79,12 +78,15 @@ function wireSearch() {
 function wirePlayerControls() {
   const video = document.getElementById('video');
   if (!video) return;
-  
-  
-  if (muteBtn && muteLabel) {
+
+  if (muteBtn) {
+    const updateIcon = () => {
+      muteBtn.textContent = video.muted ? '🔇' : '🔈';
+    };
+    updateIcon();
     muteBtn.addEventListener('click', () => {
       video.muted = !video.muted;
-      muteLabel.textContent = video.muted ? 'Unmute' : 'Mute';
+      updateIcon();
     });
   }
 
@@ -95,6 +97,47 @@ function wirePlayerControls() {
         container?.requestFullscreen?.();
       } else {
         document.exitFullscreen?.();
+      }
+    });
+  }
+
+  // Swipe left/right to change channels
+  const container = document.getElementById('video-container');
+  if (container) {
+    let touchStartX = null;
+    let touchStartY = null;
+
+    container.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+    });
+
+    container.addEventListener('touchend', (e) => {
+      if (touchStartX === null || touchStartY === null) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+      const absDx = Math.abs(dx);
+      const absDy = Math.abs(dy);
+      touchStartX = null;
+      touchStartY = null;
+
+      const threshold = 40;
+      if (absDx > threshold && absDx > absDy && channels.length) {
+        const current = getCurrentChannel();
+        let idx = channels.findIndex((c) => c.name === (current && current.name));
+        if (idx < 0) idx = 0;
+        if (dx < 0) {
+          // swipe left -> next
+          idx += 1;
+        } else {
+          // swipe right -> previous
+          idx -= 1;
+        }
+        if (idx < 0) idx = channels.length - 1;
+        if (idx >= channels.length) idx = 0;
+        playChannel(channels[idx]);
       }
     });
   }
@@ -138,7 +181,10 @@ function wireKeyboardControls() {
       tag === 'TEXTAREA' ||
       (target && target.isContentEditable);
 
-    // Fullscreen toggle (F/f) always works
+    // Ignore shortcuts while typing in inputs
+    if (isTyping) return;
+
+    // Fullscreen toggle (F/f)
     if (e.key === 'F' || e.key === 'f') {
       e.preventDefault();
       const container = document.getElementById('video-container');
@@ -149,9 +195,6 @@ function wireKeyboardControls() {
       }
       return;
     }
-
-    // Ignore other shortcuts while typing in inputs
-    if (isTyping) return;
 
     // Channel surf with arrows
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
@@ -185,6 +228,34 @@ function wireKeyboardControls() {
   });
 }
 
+let overlayHideTimeout = null;
+
+function setupOverlayAutoHide() {
+  const container = document.getElementById('video-container');
+  if (!container) return;
+
+  const scheduleHide = () => {
+    if (overlayHideTimeout) {
+      clearTimeout(overlayHideTimeout);
+    }
+    overlayHideTimeout = window.setTimeout(() => {
+      container.classList.add('overlays-hidden');
+    }, 10000);
+  };
+
+  const markActivity = () => {
+    container.classList.remove('overlays-hidden');
+    scheduleHide();
+  };
+
+  ['click', 'touchstart'].forEach((ev) => {
+    container.addEventListener(ev, markActivity);
+  });
+  window.addEventListener('keydown', markActivity);
+
+  markActivity();
+}
+
 export async function initUI() {
   startClock();
   wireSearch();
@@ -202,4 +273,5 @@ export async function initUI() {
     playChannel(channels[0]);
   }
 
+  setupOverlayAutoHide();
 }
