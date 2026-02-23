@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - page not found</title>
+    <style>
+        /* ultra simple, minimal, centered */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f7fa;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            color: #1e293b;
+        }
+
+        .card {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 2px 5px 0 rgba(0,0,0,0.02);
+            border: 1px solid #e9edf2;
+        }
+
+        h1 {
+            font-size: 5rem;
+            font-weight: 600;
+            line-height: 1;
+            color: #0b1f33;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .message {
+            font-size: 1.3rem;
+            font-weight: 450;
+            margin-bottom: 1rem;
+            color: #2d3f57;
+        }
+
+        .desc {
+            color: #526477;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            border-bottom: 1px solid #dee5ed;
+            padding-bottom: 1.5rem;
+        }
+
+        .home-link {
+            display: inline-block;
+            background-color: #1d2b3f;
+            color: white;
+            text-decoration: none;
+            padding: 0.7rem 2rem;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: background 0.15s;
+            border: 1px solid #2b3f5c;
+        }
+
+        .home-link:hover {
+            background-color: #253a55;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>404</h1>
+        <div class="message">page not found</div>
+        <div class="desc">The link you followed may be broken, or the page has been moved.</div>
+    </div>
+</body>
+</html>
