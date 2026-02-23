@@ -628,7 +628,7 @@
         height: 100%;
         padding: 16px 20px;
         display: grid;
-        grid-template-columns: minmax(0, 1.6fr) minmax(0, 2fr);
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1.6fr);
         grid-template-rows: auto minmax(0, 1.1fr) minmax(0, 1fr);
         grid-template-areas:
           "top top"
@@ -644,6 +644,7 @@
 
       .player-shell {
         grid-area: player;
+        aspect-ratio: auto;
       }
 
       .controls-row {
