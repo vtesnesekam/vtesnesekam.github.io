@@ -5,25 +5,20 @@ let ui = null;
 let currentChannel = null;
 let unmuted = false;
 
-const statusDotEl = document.getElementById('status-dot');
-const statusTextEl = document.getElementById('status-text');
 const statusTechEl = document.getElementById('status-tech');
 const qualityEl = document.getElementById('current-channel-quality');
+const statusBadgeEl = document.getElementById('current-channel-status');
 
 function setStatus(text, ok = true) {
-  if (statusTextEl) statusTextEl.textContent = text;
-  if (statusDotEl) {
-    if (ok) {
-      statusDotEl.style.background =
-        'radial-gradient(circle at 30% 30%, #4ade80, #16a34a)';
-      statusDotEl.style.boxShadow =
-        '0 0 0 1px rgba(34,197,94,0.6),0 0 0 4px rgba(22,163,74,0.2)';
-    } else {
-      statusDotEl.style.background =
-        'radial-gradient(circle at 30% 30%, #f97373, #b91c1c)';
-      statusDotEl.style.boxShadow =
-        '0 0 0 1px rgba(248,113,113,0.7),0 0 0 4px rgba(220,38,38,0.25)';
-    }
+  if (statusBadgeEl) {
+    statusBadgeEl.textContent = text;
+    statusBadgeEl.style.background = ok
+      ? 'rgba(34,197,94,0.15)'
+      : 'rgba(220,38,38,0.15)';
+    statusBadgeEl.style.borderColor = ok
+      ? 'rgba(74,222,128,0.9)'
+      : 'rgba(248,113,113,0.9)';
+    statusBadgeEl.style.color = ok ? '#bbf7d0' : '#fecaca';
   }
 }
 
@@ -38,7 +33,7 @@ export async function initPlayer() {
   const video = document.getElementById('video');
   if (!video) return;
   const hasShaka = typeof window.shaka !== 'undefined';
-  statusTechEl.textContent = hasShaka ? 'Shaka' : 'HTML5';
+  if (statusTechEl) statusTechEl.textContent = hasShaka ? 'Shaka' : 'HTML5';
   if (!hasShaka) {
     setStatus('Ready (HTML5 fallback)');
     return;
@@ -47,7 +42,7 @@ export async function initPlayer() {
   shaka.polyfill.installAll();
   if (!shaka.Player.isBrowserSupported()) {
     setStatus('Browser not supported, using HTML5', false);
-    statusTechEl.textContent = 'HTML5';
+    if (statusTechEl) statusTechEl.textContent = 'HTML5';
     return;
   }
 
@@ -62,7 +57,7 @@ export async function initPlayer() {
   player.addEventListener('loading', () => setStatus('Loading…'));
   player.addEventListener('buffering', (ev) => {
     if (ev.buffering) setStatus('Buffering…');
-    else setStatus('Live');
+    else setStatus('LIVE');
   });
 
   setStatus('Ready');
@@ -76,7 +71,10 @@ export async function playChannel(channel) {
   const { url, drm } = channel;
 
   const tech = detectProtocol(url);
-  statusTechEl.textContent = typeof window.shaka !== 'undefined' && player ? `Shaka · ${tech}` : tech;
+  if (statusTechEl) {
+    statusTechEl.textContent =
+      typeof window.shaka !== 'undefined' && player ? `Shaka · ${tech}` : tech;
+  }
 
   // UI
   const nameEl = document.getElementById('current-channel-name');
