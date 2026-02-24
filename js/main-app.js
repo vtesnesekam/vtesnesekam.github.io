@@ -10,10 +10,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   
     if (!source || source === "false") {
       window.location.href = "pagenotfound.html";
+      window.history.pushState({}, '', '/');
       return
     }
   } catch (e) {
     window.location.href = "pagenotfound.html";
+    window.history.pushState({}, '', '/');
     return;
   }
 
