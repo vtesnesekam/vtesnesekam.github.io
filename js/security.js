@@ -1,9 +1,16 @@
 // security.js - AES Decryption Service for Flutter compatibility
 
-import CryptoJS from 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js';
+// Load CryptoJS from CDN (it will be available globally)
+// We don't need to import it as a module since it attaches to window
 
 export class AesDecryptionService {
     constructor() {
+        // Check if CryptoJS is available
+        if (typeof CryptoJS === 'undefined') {
+            console.error('CryptoJS not loaded. Make sure to include the script in your HTML.');
+            throw new Error('CryptoJS is required for decryption');
+        }
+
         // AES-256 requires exactly 32 bytes
         this._rawKey = "makesense@2026makesense@2026!!!!";
         // IV must be exactly 16 bytes for AES CBC
