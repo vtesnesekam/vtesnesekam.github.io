@@ -159,10 +159,10 @@ export async function loadChannels() {
 
     // Validate the key as a URL
     try {
-      const parsedUrl = new URL(validation.key);
-      console.log('Fetching channels from:', parsedUrl.href);
+      const parsedUrl = validation.key);
+      console.log('Fetching channels from:', validation.key);
       
-      const res = await fetch(parsedUrl.href, { cache: "no-store" });
+      const res = await fetch(parsedUrl, { cache: "no-store" });
 
       if (!res.ok) {
         throw new Error(`Failed to fetch channels.json: ${res.status}`);
