@@ -1,110 +1,94 @@
-/**
- * AES Decryption Service for GitHub Pages
- * Matches Flutter implementation: AES-256-CBC with PKCS7 padding
- * Key: "makesense@2026makesense@2026!!!!" (32 bytes)
- * IV: "1234567890123456" (16 bytes)
- */
-window.AesDecryptionService = class {
+// security.js - AES Decryption Service for Flutter compatibility
+
+import CryptoJS from 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js';
+
+export class AesDecryptionService {
     constructor() {
-        // Exactly matching Flutter keys
-        this.key = "makesense@2026makesense@2026!!!!";
-        this.iv = "1234567890123456";
+        // AES-256 requires exactly 32 bytes
+        this._rawKey = "makesense@2026makesense@2026!!!!";
+        // IV must be exactly 16 bytes for AES CBC
+        this._rawIv = "1234567890123456";
+        
+        // Parse key and IV once for efficiency
+        this.key = CryptoJS.enc.Utf8.parse(this._rawKey);
+        this.iv = CryptoJS.enc.Utf8.parse(this._rawIv);
     }
 
-    // Decrypt base64 encrypted text from Flutter
+    /**
+     * Decrypt text encrypted by Flutter app
+     * @param {string} encryptedBase64 - Base64 encrypted string from Flutter
+     * @returns {string} - Decrypted plain text
+     */
     decryptText(encryptedBase64) {
         try {
-            // Convert key and IV to bytes
-            const keyBytes = this._stringToBytes(this.key);
-            const ivBytes = this._stringToBytes(this.iv);
-            
-            // Decode base64 to bytes
-            const encryptedBytes = this._base64ToBytes(encryptedBase64);
-            
-            // AES decryption (using built-in CryptoJS if available)
-            if (typeof CryptoJS !== 'undefined') {
-                return this._decryptWithCryptoJS(encryptedBase64);
-            } else {
-                return this._decryptWithWebCrypto(keyBytes, ivBytes, encryptedBytes);
+            if (!encryptedBase64 || typeof encryptedBase64 !== 'string') {
+                throw new Error('Invalid encrypted data');
             }
+
+            // Decrypt using AES-256-CBC with PKCS7 padding
+            const decrypted = CryptoJS.AES.decrypt(encryptedBase64, this.key, {
+                iv: this.iv,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.Pkcs7
+            });
+            
+            // Convert to UTF8 string
+            const result = decrypted.toString(CryptoJS.enc.Utf8);
+            
+            if (!result) {
+                throw new Error('Decryption failed - invalid data or key');
+            }
+            
+            return result;
         } catch (error) {
-            console.error('Decryption error:', error);
+            console.error('Decryption error:', error.message);
             throw error;
         }
     }
 
-    // Check if encrypted string is valid
-    isValid(encryptedText) {
+    /**
+     * Validate if encrypted string is valid (can be decrypted)
+     * @param {string} encryptedBase64 
+     * @returns {boolean}
+     */
+    isValid(encryptedBase64) {
         try {
-            this.decryptText(encryptedText);
-            return true;
+            if (!encryptedBase64 || typeof encryptedBase64 !== 'string') {
+                return false;
+            }
+            
+            const decrypted = this.decryptText(encryptedBase64);
+            return decrypted !== null && decrypted.length > 0;
         } catch {
             return false;
         }
     }
 
-    // Method 1: Using CryptoJS (included via CDN)
-    _decryptWithCryptoJS(encryptedBase64) {
-        // Parse key and IV
-        const key = CryptoJS.enc.Utf8.parse(this.key);
-        const iv = CryptoJS.enc.Utf8.parse(this.iv);
-        
-        // Decrypt
-        const decrypted = CryptoJS.AES.decrypt(
-            encryptedBase64,
-            key,
-            {
-                iv: iv,
-                mode: CryptoJS.mode.CBC,
-                padding: CryptoJS.pad.Pkcs7
-            }
-        );
-        
-        return decrypted.toString(CryptoJS.enc.Utf8);
+    /**
+     * Decrypt and parse as JSON
+     * @param {string} encryptedBase64 
+     * @returns {object}
+     */
+    decryptJSON(encryptedBase64) {
+        const decrypted = this.decryptText(encryptedBase64);
+        return JSON.parse(decrypted);
     }
 
-    // Method 2: Using Web Crypto API
-    async _decryptWithWebCrypto(keyBytes, ivBytes, encryptedBytes) {
-        // Import key
-        const cryptoKey = await crypto.subtle.importKey(
-            'raw',
-            keyBytes,
-            { name: 'AES-CBC' },
-            false,
-            ['decrypt']
-        );
-        
-        // Decrypt
-        const decryptedBuffer = await crypto.subtle.decrypt(
-            {
-                name: 'AES-CBC',
-                iv: ivBytes
-            },
-            cryptoKey,
-            encryptedBytes
-        );
-        
-        // Convert to string
-        const decryptedBytes = new Uint8Array(decryptedBuffer);
-        return new TextDecoder().decode(decryptedBytes);
-    }
-
-    // Helper: Convert string to bytes
-    _stringToBytes(str) {
-        const bytes = new Uint8Array(str.length);
-        for (let i = 0; i < str.length; i++) {
-            bytes[i] = str.charCodeAt(i);
-        }
-        return bytes;
-    }
-
-    // Helper: Convert base64 to bytes
-    _base64ToBytes(base64) {
-        const binary = atob(base64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-            bytes[i] = binary.charCodeAt(i);
-        }
-        return bytes;
+    /**
+     * Get configuration info (for debugging)
+     * @returns {object}
+     */
+    getConfig() {
+        return {
+            algorithm: 'AES-256-CBC',
+            key: this._rawKey,
+            keyLength: this._rawKey.length,
+            iv: this._rawIv,
+            ivLength: this._rawIv.length,
+            padding: 'PKCS7'
+        };
     }
 }
+
+// Also export a default instance if needed
+export default AesDecryptionService;
