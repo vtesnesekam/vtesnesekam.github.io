@@ -108,9 +108,3 @@ window.AesDecryptionService = class {
         return bytes;
     }
 }
-
-// Also export as a simple function for easy use
-window.decryptFlutterData = function(encryptedBase64) {
-    const service = new window.AesDecryptionService();
-    return service.decryptText(encryptedBase64);
-};
