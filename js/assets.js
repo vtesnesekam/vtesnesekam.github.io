@@ -148,25 +148,6 @@ export async function loadChannels() {
 
     // Validate and decrypt the source
     const validation = await validateAndDecryptSource(source);
-    
-    if (!validation.valid) {
-      console.log('Source validation failed:', validation.reason);
-      
-      // Show error message to user before redirect
-      const statusDiv = document.getElementById('app-status');
-      if (statusDiv) {
-        statusDiv.textContent = '❌ Access denied: ' + (validation.reason || 'Invalid source');
-        statusDiv.className = 'status error';
-      }
-      
-      // Redirect to 404 page
-      setTimeout(() => {
-        window.location.href = "pagenotfound.html";
-        window.history.pushState({}, '', '/');
-      }, 20000);
-      
-      throw new Error(`Invalid source: ${validation.reason}`);
-    }
 
     // Log validation info for debugging
     console.log('Source validated:', {
@@ -198,17 +179,12 @@ export async function loadChannels() {
       
     } catch (urlError) {
       console.error('Invalid key URL:', validation.key, urlError);
-      window.location.href = "pagenotfound.html";
-      window.history.pushState({}, '', '/');
       throw new Error('Invalid source URL format');
     }
 
   } catch (error) {
     console.error("Error loading channels:", error);
     
-    // Ensure redirect on error
-    window.location.href = "pagenotfound.html";
-    window.history.pushState({}, '', '/');
     return [];
   }
 }
