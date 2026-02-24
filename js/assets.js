@@ -4,6 +4,7 @@
  * Get network time from multiple sources (matches Flutter TimeService)
  * @returns {Promise<number>} Network time in milliseconds since epoch
  */
+import { AesDecryptionService } from './security.js';
 async function getNetworkTime() {
   // Reliable time sources (matching Flutter)
   const timeApis = [
