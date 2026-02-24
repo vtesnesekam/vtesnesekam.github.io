@@ -159,7 +159,7 @@ export async function loadChannels() {
 
     // Validate the key as a URL
     try {
-      const parsedUrl = validation.key);
+      const parsedUrl = validation.key;
       console.log('Fetching channels from:', validation.key);
       
       const res = await fetch(parsedUrl, { cache: "no-store" });
