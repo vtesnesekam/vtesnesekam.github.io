@@ -2,13 +2,16 @@
 
 import { initPlayer } from './player-logic.js';
 import { initUI } from './ui-logic.js';
+import { AesDecryptionService } from './security.js';
 
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     const params = new URLSearchParams(window.location.search);
+    const decryptor = new AesDecryptionService();
     const source = params.get("source");
+    bool isValidSource = await decryptor.isValid(source);
   
-    if (!source || source === "false") {
+    if (!source || source === "false" || !isValidSource) {
       window.location.href = "pagenotfound.html";
       window.history.pushState({}, '', '/');
       return
