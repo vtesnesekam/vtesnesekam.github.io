@@ -1,9 +1,3 @@
-// Simple asset helpers with time sync and expiry validation
-
-/**
- * Get network time from multiple sources (matches Flutter TimeService)
- * @returns {Promise<number>} Network time in milliseconds since epoch
- */
 import { AesDecryptionService } from './security.js';
 async function getNetworkTime() {
   // Reliable time sources (matching Flutter)
@@ -82,11 +76,6 @@ async function getNetworkTime() {
   return Date.now();
 }
 
-/**
- * Decrypt and validate source parameter
- * @param {string} encryptedSource - The encrypted source parameter from URL
- * @returns {Promise<{valid: boolean, key: string|null, reason?: string}>}
- */
 async function validateAndDecryptSource(encryptedSource) {
   try {
     if (!encryptedSource || encryptedSource === "false") {
@@ -138,62 +127,48 @@ async function validateAndDecryptSource(encryptedSource) {
   }
 }
 
-/**
- * Load channels from validated source
- * @returns {Promise<Array>} Array of channels
- */
 export async function loadChannels() {
   try {
     const params = new URLSearchParams(window.location.search);
     const source = params.get("source");
-
-    // Validate and decrypt the source
     const validation = await validateAndDecryptSource(source);
 
-    // Log validation info for debugging
-    console.log('Source validated:', {
-      key: validation.key,
-      expires: new Date(validation.expiry).toISOString(),
-      timeRemaining: validation.timeRemaining + ' seconds'
-    });
-
-    // Validate the key as a URL
-    try {
-      const parsedUrl = validation.key;
-      console.log('Fetching channels from:', validation.key);
-      
-      const res = await fetch(parsedUrl, { cache: "no-store" });
-
-      if (!res.ok) {
-        throw new Error(`Failed to fetch channels.json: ${res.status}`);
-      }
-
-      const list = await res.json();
-
-      if (!Array.isArray(list)) {
-        throw new Error("Invalid JSON format: expected an array");
-      }
-      
-      // Clean URL and return filtered list
+    if (!validation.valid) {
       window.history.pushState({}, '', '/');
-      return list.filter(Boolean);
-      
-    } catch (urlError) {
-      console.error('Invalid key URL:', validation.key, urlError);
-      throw new Error('Invalid source URL format');
+      // Goes back one step in the browser's history
+      window.history.back();
+
+      throw new Error("Invalid source");
+    }
+    const key = validation.key
+    const parsedUrl = new URL(key); // validates URL format
+
+    const res = await fetch(parsedUrl.href, { cache: "no-store" });
+
+    if (!res.ok) {
+      window.history.pushState({}, '', '/');
+      window.history.back();
+      throw new Error(`Failed to fetch channels.json: ${res.status}`);
     }
 
+    const list = await res.json();
+
+    if (!Array.isArray(list)) {
+      window.history.pushState({}, '', '/');
+      window.history.back();
+      throw new Error("Invalid JSON format: expected an array");
+    }
+    window.history.pushState({}, '', '/');
+    return list.filter(Boolean);
+
   } catch (error) {
+    window.history.pushState({}, '', '/');
     console.error("Error loading channels:", error);
-    
+    window.history.back();
     return [];
   }
 }
 
-/**
- * Get time remaining for current session
- * @returns {Promise<number|null>} Seconds remaining or null if not validated
- */
 export async function getTimeRemaining() {
   try {
     const params = new URLSearchParams(window.location.search);
