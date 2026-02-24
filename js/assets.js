@@ -6,6 +6,7 @@ export async function loadChannels() {
     const source = params.get("source");
 
     if (!source) {
+      window.history.pushState({}, '', '/');
       throw new Error("Missing 'source' parameter in URL");
     }
 
@@ -14,18 +15,21 @@ export async function loadChannels() {
     const res = await fetch(parsedUrl.href, { cache: "no-store" });
 
     if (!res.ok) {
+      window.history.pushState({}, '', '/');
       throw new Error(`Failed to fetch channels.json: ${res.status}`);
     }
 
     const list = await res.json();
 
     if (!Array.isArray(list)) {
+      window.history.pushState({}, '', '/');
       throw new Error("Invalid JSON format: expected an array");
     }
-
+    window.history.pushState({}, '', '/');
     return list.filter(Boolean);
 
   } catch (error) {
+    window.history.pushState({}, '', '/');
     console.error("Error loading channels:", error);
     return [];
   }
