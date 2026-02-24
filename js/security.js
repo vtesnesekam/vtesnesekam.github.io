@@ -1,4 +1,5 @@
-class AesEncryptionService {
+// aes-decryption.js - Browser ES Module
+export class AesDecryptionService {
   constructor() {
     // Match Flutter's key generation
     const secretString = "makesense@2026";
@@ -6,15 +7,19 @@ class AesEncryptionService {
     
     // Match Flutter's IV: utf8.decode(Uint8List(16)) = 16 null bytes as string
     this.ivString = '\0'.repeat(16);
+    
+    // Text encoder/decoder for browser
+    this.textEncoder = new TextEncoder();
+    this.textDecoder = new TextDecoder();
   }
 
   async decryptText(encryptedBase64) {
     try {
-      // Convert key to bytes (using UTF8)
-      const keyBuffer = new TextEncoder().encode(this.securityKey);
+      // Convert key to bytes
+      const keyBuffer = this.textEncoder.encode(this.securityKey);
       
-      // Convert IV to bytes (null characters become zero bytes)
-      const ivBuffer = new TextEncoder().encode(this.ivString);
+      // Convert IV to bytes
+      const ivBuffer = this.textEncoder.encode(this.ivString);
       
       // Import the key for Web Crypto
       const cryptoKey = await crypto.subtle.importKey(
@@ -39,7 +44,7 @@ class AesEncryptionService {
       );
       
       // Convert decrypted data to string
-      const decryptedText = new TextDecoder().decode(decryptedBuffer);
+      const decryptedText = this.textDecoder.decode(decryptedBuffer);
       return decryptedText;
       
     } catch (error) {
@@ -57,3 +62,6 @@ class AesEncryptionService {
     }
   }
 }
+
+// Default export
+export default AesDecryptionService;
