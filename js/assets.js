@@ -135,10 +135,8 @@ export async function loadChannels() {
 
     if (!validation.valid) {
       window.history.pushState({}, '', '/');
-      // Goes back one step in the browser's history
-      window.history.back();
-
-      throw new Error("Invalid source");
+      window.location.href = "pagenotfound.html";
+      return;
     }
     const key = validation.key
     const parsedUrl = new URL(key); // validates URL format
@@ -147,24 +145,23 @@ export async function loadChannels() {
 
     if (!res.ok) {
       window.history.pushState({}, '', '/');
-      window.history.back();
-      throw new Error(`Failed to fetch channels.json: ${res.status}`);
+      window.location.href = "pagenotfound.html";
+      return;
     }
 
     const list = await res.json();
 
     if (!Array.isArray(list)) {
       window.history.pushState({}, '', '/');
-      window.history.back();
-      throw new Error("Invalid JSON format: expected an array");
+      window.location.href = "pagenotfound.html";
+      return;
     }
     window.history.pushState({}, '', '/');
     return list.filter(Boolean);
 
   } catch (error) {
     window.history.pushState({}, '', '/');
-    console.error("Error loading channels:", error);
-    window.history.back();
+    window.location.href = "pagenotfound.html";
     return [];
   }
 }
